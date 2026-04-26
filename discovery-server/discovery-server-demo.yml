@@ -18,7 +18,6 @@ spring:
     password: admin123    # Docker container RabbitMQ password
 
 
-
 management:
   endpoints:
     web:
