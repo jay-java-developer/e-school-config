@@ -1,0 +1,25 @@
+server:
+  port: 8761 # Sets the port for the Eureka Server
+
+eureka:
+  instance:
+    hostname: localhost # Defines the hostname for the Eureka Server instance
+  client:
+    fetchRegistry: false # Disables fetching registry (not needed for Eureka Server)
+    registerWithEureka: false # Prevents Eureka Server from registering itself
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/ # Default service URL for Eureka clients to connect
+
+spring:
+  rabbitmq:
+    host: localhost       # Host where RabbitMQ is running
+    port: 5672            # Default port for RabbitMQ
+    username: admin       # Docker container RabbitMQ username
+    password: admin123    # Docker container RabbitMQ password
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # Exposes all actuator endpoints, including /actuator/bus-refresh for triggering config updates

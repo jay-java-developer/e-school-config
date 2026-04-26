@@ -1,0 +1,73 @@
+server:
+  port: 8081 # Sets the server port for the API Gateway
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true # Enables route discovery from Eureka-registered services
+              lower-case-service-id: true # Converts service IDs to lowercase for route paths (e.g., /users-service)
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/e-school-micro-service # JWT issuer URI for authentication
+
+  rabbitmq:
+    host: localhost       # Host where RabbitMQ is running
+    port: 5672            # Default port for RabbitMQ
+    username: admin       # Docker container RabbitMQ username
+    password: admin123    # Docker container RabbitMQ password
+
+eureka:
+  instance:
+    hostname: localhost # Hostname for Eureka registration
+  client:
+    fetchRegistry: true # Enable fetching registry
+    registerWithEureka: true # Register API gateway itself
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka/ # Eureka Server URL
+
+
+# Actuator Endpoints
+management:
+  health:
+    circuitbreakers:
+      enabled: true # Show health status of circuit breakers
+  endpoints:
+    web:
+      exposure:
+        include: "*" # Expose all actuator endpoints
+  endpoint:
+    health:
+      show-details: always # Always show detailed health info
+
+# Resilience4j Properties
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true # Register circuit breaker health with actuator
+        slidingWindowType: COUNT_BASED # Use count-based window for monitoring failures
+        slidingWindowSize: 10 # Number of calls to record in sliding window
+        failureRateThreshold: 50 # % of failures to trip the circuit breaker
+        waitDurationInOpenState: 5s # Time circuit breaker stays open before retry
+        permittedNumberOfCallsInHalfOpenState: 3 # Allowed calls in half-open state
+        automaticTransitionFromOpenToHalfOpenEnabled: true # Auto transition from open to half-open
+        minimum-number-of-calls: 5 # Minimum calls required before evaluating failure rate
+
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 3s # Max time a call can take before timing out
+
+  retry:
+    configs:
+      default:
+        max-attempts: 3 # Retry attempts before failing
+        wait-duration: 2s # Wait time between retries
+
+
