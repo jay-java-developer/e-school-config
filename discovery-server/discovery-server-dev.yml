@@ -12,7 +12,7 @@ eureka:
 
 spring:
   rabbitmq:
-    host: rabbitmq       # Host where RabbitMQ is running
+    host: localhost       # Host where RabbitMQ is running
     port: 5672            # Default port for RabbitMQ
     username: admin       # Docker container RabbitMQ username
     password: admin123    # Docker container RabbitMQ password
