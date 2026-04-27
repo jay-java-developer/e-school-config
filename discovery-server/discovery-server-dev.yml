@@ -1,5 +1,5 @@
 server:
-  port: 87611  # Port where the Eureka Server will run
+  port: 8761  # Port where the Eureka Server will run
 
 eureka:
   instance:
