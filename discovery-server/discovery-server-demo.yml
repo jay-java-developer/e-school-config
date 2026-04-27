@@ -11,12 +11,23 @@ eureka:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/ # Default service URL for Eureka clients to connect
 
 spring:
+  cloud:
+    bus:
+      enabled: true  # Enables Spring Cloud Bus for dynamic config refresh across services
+      destination: springCloudBus  # Messaging topic/exchange name for bus events
+    stream:
+      bindings:
+        springCloudBusInput:
+          destination: springCloudBus  # Must match bus destination
+          group: config-server-group  # Consumer group for Config Server (important for message handling)
   rabbitmq:
     host: localhost       # Host where RabbitMQ is running
     port: 5672            # Default port for RabbitMQ
     username: admin       # Docker container RabbitMQ username
     password: admin123    # Docker container RabbitMQ password
-
+    listener:
+      simple:
+        missing-queues-fatal: false  # Prevent app crash if queue is not yet created
 
 management:
   endpoints:
