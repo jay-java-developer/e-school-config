@@ -1,36 +1,47 @@
 server:
-  port: 8761 # Sets the port for the Eureka Server
+  port: 8761  # Port where the Eureka Server will run
 
 eureka:
   instance:
-    hostname: localhost # Defines the hostname for the Eureka Server instance
+    hostname: localhost  # Hostname of the Eureka Server
+
   client:
-    fetchRegistry: false # Disables fetching registry (not needed for Eureka Server)
-    registerWithEureka: false # Prevents Eureka Server from registering itself
+    fetchRegistry: false        # Eureka Server does NOT fetch registry (acts as registry itself)
+    registerWithEureka: false   # Prevents Eureka Server from registering itself
+
     serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/ # Default service URL for Eureka clients to connect
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+      # Base URL used by clients to connect to Eureka Server
 
 spring:
   cloud:
     bus:
-      enabled: true  # Enables Spring Cloud Bus for dynamic config refresh across services
-      destination: springCloudBus  # Messaging topic/exchange name for bus events
+      enabled: true  # Enable Spring Cloud Bus for distributed config refresh
+      destination: springCloudBus  # Topic/exchange name used for bus communication
+
     stream:
       bindings:
         springCloudBusInput:
-          destination: springCloudBus  # Must match bus destination
-          group: config-server-group  # Consumer group for Config Server (important for message handling)
+          destination: springCloudBus  # Must match the bus destination
+          group: config-server-group  # Consumer group for handling messages
+
   rabbitmq:
-    host: localhost       # Host where RabbitMQ is running
-    port: 5672            # Default port for RabbitMQ
-    username: admin       # Docker container RabbitMQ username
-    password: admin123    # Docker container RabbitMQ password
+    host: localhost       # RabbitMQ server host
+    port: 5672            # Default RabbitMQ port
+    username: admin       # RabbitMQ username
+    password: admin123    # RabbitMQ password
+
     listener:
       simple:
-        missing-queues-fatal: false  # Prevent app crash if queue is not yet created
+        missing-queues-fatal: false
+        # Prevent application crash if queues are not yet created
 
+# ===============================
+# Actuator Configuration
+# ===============================
 management:
   endpoints:
     web:
       exposure:
-        include: "*"  # Exposes all actuator endpoints, including /actuator/bus-refresh for triggering config updates
+        include: "*"
+        # Expose all actuator endpoints (e.g., /actuator/bus-refresh)

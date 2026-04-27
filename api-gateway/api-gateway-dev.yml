@@ -1,5 +1,5 @@
 server:
-  port: 8081 # Sets the server port for the API Gateway
+  port: 8081  # Port where the API Gateway will run
 
 spring:
   cloud:
@@ -8,66 +8,106 @@ spring:
         webflux:
           discovery:
             locator:
-              enabled: true # Enables route discovery from Eureka-registered services
-              lower-case-service-id: true # Converts service IDs to lowercase for route paths (e.g., /users-service)
+              enabled: true  # Enable automatic route mapping using Eureka service names
+              lower-case-service-id: true  # Convert service IDs to lowercase in routes (e.g., /user-service)
+
+    bus:
+      enabled: true  # Enable Spring Cloud Bus for distributed configuration updates
+      destination: springCloudBus  # Messaging topic/exchange used for bus events
+
+    stream:
+      bindings:
+        springCloudBusInput:
+          destination: springCloudBus  # Must match the bus destination
+          group: config-server-group  # Consumer group (important for message processing)
+
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/e-school-micro-service # JWT issuer URI for authentication
+          issuer-uri: http://localhost:8080/realms/e-school-micro-service
+          # URL of the authorization server issuing JWT tokens (e.g., Keycloak)
 
   rabbitmq:
-    host: localhost       # Host where RabbitMQ is running
-    port: 5672            # Default port for RabbitMQ
-    username: admin       # Docker container RabbitMQ username
-    password: admin123    # Docker container RabbitMQ password
+    host: localhost       # RabbitMQ server host
+    port: 5672            # Default RabbitMQ port
+    username: admin       # RabbitMQ username (as configured in Docker/container)
+    password: admin123    # RabbitMQ password
+    listener:
+      simple:
+        missing-queues-fatal: false
+        # Prevent application failure if queues are not yet created
 
 eureka:
   instance:
-    hostname: localhost # Hostname for Eureka registration
+    hostname: localhost  # Hostname used for Eureka registration
+
   client:
-    fetchRegistry: true # Enable fetching registry
-    registerWithEureka: true # Register API gateway itself
+    fetchRegistry: true        # Fetch registry of services from Eureka
+    registerWithEureka: true   # Register this API Gateway with Eureka
     serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:8761/eureka/ # Eureka Server URL
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka/
+      # Eureka Server URL
 
-
-# Actuator Endpoints
+# ===============================
+# Actuator Configuration
+# ===============================
 management:
   health:
     circuitbreakers:
-      enabled: true # Show health status of circuit breakers
+      enabled: true  # Include circuit breaker status in health endpoint
+
   endpoints:
     web:
       exposure:
-        include: "*" # Expose all actuator endpoints
+        include: "*"  # Expose all actuator endpoints (use carefully in production)
+
   endpoint:
     health:
-      show-details: always # Always show detailed health info
+      show-details: always  # Always show detailed health information
 
-# Resilience4j Properties
+# ===============================
+# Resilience4j Configuration
+# ===============================
 resilience4j:
   circuitbreaker:
     configs:
       default:
-        registerHealthIndicator: true # Register circuit breaker health with actuator
-        slidingWindowType: COUNT_BASED # Use count-based window for monitoring failures
-        slidingWindowSize: 10 # Number of calls to record in sliding window
-        failureRateThreshold: 50 # % of failures to trip the circuit breaker
-        waitDurationInOpenState: 5s # Time circuit breaker stays open before retry
-        permittedNumberOfCallsInHalfOpenState: 3 # Allowed calls in half-open state
-        automaticTransitionFromOpenToHalfOpenEnabled: true # Auto transition from open to half-open
-        minimum-number-of-calls: 5 # Minimum calls required before evaluating failure rate
+        registerHealthIndicator: true
+        # Register circuit breaker health with actuator
+
+        slidingWindowType: COUNT_BASED
+        # Use a fixed number of calls to measure failure rate
+
+        slidingWindowSize: 10
+        # Number of calls recorded in the window
+
+        failureRateThreshold: 50
+        # Percentage of failures to open the circuit
+
+        waitDurationInOpenState: 5s
+        # Time circuit stays open before moving to half-open
+
+        permittedNumberOfCallsInHalfOpenState: 3
+        # Allowed test calls when half-open
+
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        # Automatically transition from OPEN to HALF-OPEN
+
+        minimum-number-of-calls: 5
+        # Minimum calls before calculating failure rate
 
   timelimiter:
     configs:
       default:
-        timeout-duration: 3s # Max time a call can take before timing out
+        timeout-duration: 3s
+        # Maximum time allowed for a request before timeout
 
   retry:
     configs:
       default:
-        max-attempts: 3 # Retry attempts before failing
-        wait-duration: 2s # Wait time between retries
+        max-attempts: 3
+        # Number of retry attempts before failing
 
-
+        wait-duration: 2s
+        # Delay between retries
