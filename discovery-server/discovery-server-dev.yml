@@ -5,6 +5,7 @@ eureka:
   instance:
     hostname: localhost  # Hostname of the Eureka Server
 
+
   client:
     fetchRegistry: false        # Eureka Server does NOT fetch registry (acts as registry itself)
     registerWithEureka: false   # Prevents Eureka Server from registering itself
