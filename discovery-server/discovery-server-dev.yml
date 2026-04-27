@@ -1,5 +1,5 @@
 server:
-  port: 8761  # Port where the Eureka Server will run
+  port: 87611  # Port where the Eureka Server will run
 
 eureka:
   instance:
@@ -35,7 +35,6 @@ spring:
       simple:
         missing-queues-fatal: false
         # Prevent application crash if queues are not yet created
-
 
 # ===============================
 # Actuator Configuration
